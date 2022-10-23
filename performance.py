@@ -63,7 +63,7 @@ def ground_dist(T, W, S, mu, rho, C_L, C_D0, K, V_I, V_F):
 
 # Transition
 def Gamma(T, D, W):
-    return math.asin( (T - D) / W )
+    return np.arcsin( (T - D) / W )
 
 
 
@@ -96,7 +96,7 @@ def Take_Off(T, W, S, mu, rho, C_L, C_D0, K, n=1.2):
     S_R = 3*V_to
     
     R_trans = V_trans**2 / (g * (n - 1))
-    D_to = Drag(rho_sl, V_to, S, C_D0, K, C_L)
+
     gamma_climb = Gamma(T_max*0.8, D_to, W_max)
 
     h_TR = R_trans*(1 - math.cos(gamma_climb))
@@ -121,20 +121,20 @@ V_stall = stall_vel(W_max, S, rho_sl, C_L_max)
 V_to = 1.1*V_stall
 
 L_to = Lift(rho_sl, V_to, C_L_max, S) # lift at take-off
- # drag at take-off
+D_to = Drag(rho_sl, V_to, S, C_D0, K, C_L_max) # drag at take-off
 
 
 C_L_array = np.arange(2.5, 3.7, 0.1)
 K_A_array = np.zeros_like(C_L_array)
 K_T_array = np.zeros_like(C_L_array)
 V_to_array = np.zeros_like(C_L_array)
-
+gamma_array = np.zeros_like(C_L_array)
 S = 7780
 for i in range(len(C_L_array)):
         K_A_array[i] = Take_Off(T_max, W_max, S, mu, rho_sl, C_L_array[i], C_D0, K)[-1]
         K_T_array[i] = Take_Off(T_max, W_max, S, mu, rho_sl, C_L_array[i], C_D0, K)[-2]
         V_to_array[i] = Take_Off(T_max, W_max, S, mu, rho_sl, C_L_array[i], C_D0, K)[-4]
-
+        gamma_array[i] = Take_Off(T_max, W_max, S, mu, rho_sl, C_L_array[i], C_D0, K)[5]
 
 plt.plot(C_L_array, Take_Off(T_max, W_max, S, mu, rho_sl, C_L_array, C_D0, K)[0])
 plt.xlabel('$C_L (-)$')
