@@ -96,7 +96,7 @@ def Take_Off(T, W, S, mu, rho, C_L, C_D0, K, n=1.2):
     S_R = 3*V_to
     
     R_trans = V_trans**2 / (g * (n - 1))
-
+    D_to = Drag(rho_sl, V_to, S, C_D0, K, C_L)
     gamma_climb = Gamma(T_max*0.8, D_to, W_max)
 
     h_TR = R_trans*(1 - math.cos(gamma_climb))
@@ -121,7 +121,7 @@ V_stall = stall_vel(W_max, S, rho_sl, C_L_max)
 V_to = 1.1*V_stall
 
 L_to = Lift(rho_sl, V_to, C_L_max, S) # lift at take-off
-D_to = Drag(rho_sl, V_to, S, C_D0, K, C_L_max) # drag at take-off
+ # drag at take-off
 
 
 C_L_array = np.arange(2.5, 3.7, 0.1)
