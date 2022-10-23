@@ -25,7 +25,8 @@ h_obstacle = 50 #ft
 T_max = 388000*(3/4) # take off thrust
 mu = 0.05 #rolling resistance
 C_D0 = 0.015 #historical
-
+rho_cruise = 0.000891 #slug/ft^3 -> 30,000 ft
+C = 0.478 #thrust specific fuel consumption
 
 """
 Functions
@@ -41,13 +42,6 @@ def Drag(rho, V, S, C_D0, K, C_L):
     return 1/2*rho*V**2* (C_D0 + K*C_L**2)
 
 
-# Equation 17.3 Raymer
-def Endurance(L, D, C, W_i, W_f):
-    return (L / D) * (1 / C) * np.log(W_i / W_f)
-
-# Equation  17.23, Raymer
-def Range(L, D, C, W_i, W_f, V):
-    return Endurance(L,D,C,W_i,W_f) * V
 
 
 ### GROUND ROLL
@@ -80,6 +74,35 @@ def thrust_to_weight(q, C_D0, W, S, K):
 def W_dot(C, T):
     return -C*T
 
+
+def min_vel(W, rho, S, K, C_D0):
+    return np.sqrt( (2*W) / (rho*S) * np.sqrt(K/C_D0))
+
+
+C_L_min_drag = np.sqrt( C_D0 / K)
+
+# Equation 17.3 Raymer
+def Endurance(L, D, C, W_i, W_f):
+    return (L / D) * (1 / C) * np.log(W_i / W_f)
+
+# Equation  17.23, Raymer
+def Range(L, D, C, W_i, W_f, V):
+    return Endurance(L,D,C,W_i,W_f) * V
+
+### best range equations
+def Range_Parameters(W):
+    
+    V = np.sqrt((2*W)/(rho_cruise*S) * np.sqrt(3*K / C_D0))
+    D = 1/2 * rho_cruise * V**2 * S * (4/3 * C_D0)
+    C_L = np.sqrt(C_D0 / (3*K))
+    
+    return V, D, C_L
+
+V_range, D_range, C_L_range = Range_Parameters(W_max*0.9)
+
+L_range = Lift(rho_cruise, V_range, 2, S)
+
+range_max = Range(L_range, D_range, C, W_max, 0.6*W_max,V=V_range)
 
 ## Fuel Required:
 # C * T at the different stages of flight.
@@ -148,3 +171,16 @@ plt.annotate('7000 ft',[0.5, 7300])
 #test = Take_Off(T_max, W_max, S, mu, rho_sl, 3, C_D0, K)
 
 test = K_T_array + K_A_array*V_to_array**2
+
+
+
+
+
+
+###
+
+
+
+
+
+
