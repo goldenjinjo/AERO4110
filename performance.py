@@ -11,22 +11,35 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 
+metric = False
 
 """
 Variables
 """
 g = 32.174 #ft/s^2
-S = 6900 #ft^2
+S = 6891 #ft^2
 W_max = 1030500 # lb
 rho_sl = 0.002377693 #slug/ft^3
 K = 0.055579171
 C_L_max = 3.2 #2.7198
 h_obstacle = 50 #ft
-T_max = 388000*(3/4) # take off thrust
+T_max = 388000 # take off thrust
 mu = 0.05 #rolling resistance
 C_D0 = 0.015 #historical
 rho_cruise = 0.000891 #slug/ft^3 -> 30,000 ft
-C = 0.478 #thrust specific fuel consumption
+C = 0.478 #thrust specific fuel consumption in lb/h
+
+if metric:
+    g = 9.81
+    S = S*0.092903
+    W_max = W_max*0.453592
+    rho_sl = rho_sl*515.379
+    h_obstacle = h_obstacle*0.3048
+    T_max = T_max*4.44822
+    rho_cruise = rho_cruise*515.379
+    C = C*0.0001259979
+    
+
 
 """
 Functions
