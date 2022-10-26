@@ -10,6 +10,7 @@ AERO4110 Code - Performance and Flight Dynamics
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+from sympy import symbols, cos, sin, N, exp, solve, simplify, sqrt
 
 metric = False
 
@@ -185,10 +186,18 @@ plt.annotate('7000 ft',[0.5, 7300])
 
 test = K_T_array + K_A_array*V_to_array**2
 
+T = T_max
+W = W_max
+constant_factor = (mu - T/W)*np.sqrt((2*W)/(rho_sl*S))
+a = symbols('C_L')
+eqn = sqrt(a) - C_D0*1/sqrt(a) - K*sqrt(a**3) - constant_factor
+
+C_L_limit = solve(eqn, a)
 
 
+print(eqn)
 
-
+test = solve(eqn, a)
 
 ###
 
