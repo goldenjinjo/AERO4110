@@ -6,6 +6,7 @@ Created on Tue Nov 22 23:54:58 2022
 
 variables
 """
+import numpy as np
 
 metric = True
 
@@ -52,6 +53,10 @@ cruise_c = 303 #speed of sound at cruise
 h_obstacle = 50 / ft #m
 runway_dist = 5950 #ft
 cruise_alt = 30000 / ft
+
+W_empty = 392435.4223*kg
+W_max_payload = 180740*kg
+W_crew = 600*kg
     
     
 if metric == False:
@@ -70,11 +75,25 @@ if metric == False:
     T_cont = 332400
     runway_dist = runway_dist * 1/ft 
     cruise_alt = cruise_alt / ft
+    
+    W_empty = 393132 #lb
+    W_max_payload = 180740 #lb
+    W_crew = 600 #LB
 
 
 V_max = mach_max*cruise_c
 
 
+
+# take-off weights calculated from numerical methods
+W_to = np.array([910000, 823000, 619000, 724000]) # weight at take off
+W_loss = np.array([283000, 225000, 155000, 294000])
+
+fuel_total = np.array([352000, 253000, 175000, 331000])
+
+fuel_climb_estimate = 14422
+
+W_land = W_to - fuel_climb_estimate - W_loss 
 
 
 

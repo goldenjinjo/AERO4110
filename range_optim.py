@@ -113,7 +113,6 @@ def Range_Iter(W_to, climb_fuel, fuel_allow, V, step, distance_req, delta_optim 
     D_array = iter2[6]
     fuelLossArray = iter2[7] + fuel_allow_new
     #fuelAllow_new = reserves + W_loss 
-    ##### I just want to scream and try again from scratch. 
 
     time_array = np.arange(0, mission_time+step, step) / 3600 # hours
 
@@ -179,9 +178,7 @@ other_fuel_estimate = 3000 #takeoff + landing + taxi
 
 W_cruise = W_max - climb_fuel
 # loads for each mission
-W_empty = 392435.4223 #lb
-W_max_payload = 180740
-W_crew = 600
+
 
 fuel_allow = W_max  - W_empty - W_max_payload - W_crew
 
@@ -272,7 +269,7 @@ mission_time_array[2] = mission_time_array[2] + loiter_array[2]
 mission_time_array[3] = mission_time_array[3] + loiter_array[3]
 
 reserves_array[0] = reserves
-W_to_array_new[0] = W_new_cruise
+W_to_array_new[0] = W_new
 W_loss_array[0] = W_crit_loss
 reserves_actual_array = fuel_allow_new_array - W_loss_array - other_fuel_estimate
 reserves_actual_array[0] = reserves_actual
@@ -294,6 +291,6 @@ D_min_drag = rho_sl*S*C_D0*V_min_drag**2
 loiter_fuel = loiter_array*D_min_drag*C
 
 
-W_loss_array[1] = W_loss_array[1]*2
-avg_fuel_array = W_loss_array / mission_time_array
+#W_loss_array[1] = W_loss_array[1]*2
+#avg_fuel_array = W_loss_array / mission_time_array
 
