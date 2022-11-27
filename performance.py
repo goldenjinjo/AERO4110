@@ -143,7 +143,7 @@ fuel_mission_1 = 487919.0187
 
 
 
-C_idle = 0.325*2.20462
+
 test = Landing(W_max, fuel_mission_1, S, C_idle, rho_sl, 2.5, 0.06)
 
 
@@ -164,9 +164,6 @@ take_off_fuel = roll_fuel + rotation_fuel + S_TR_fuel
 
 
 ### Climb
-
-
-
 C_L = 1.5
 
 rho_len = 10

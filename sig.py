@@ -43,15 +43,19 @@ def sig(realNum, numSigFig, scale=0):
     scale (default = 0) : scales real number by a factor of 10^(-3*scale).
             Input can be str in form of SI prefix e.g. 'kilo'.
     """
-     
-    if math.isnan(realNum) == True:
-        return realNum
+    
+    
+    # TODO add new check that is compatiable with numpy arrays
+    """
+    #if math.isnan(realNum).any() == True:
+    #    return realNum
 
     if realNum==0:
         return 0
+    """
     
     if numSigFig < 0:
-        return 'Error: Number of Significant Figures Cannot be Negative'
+        raise Exception('Error: Number of Significant Figures Cannot be Negative')
     
     
     # Optional scaling feature for realNum. Scales based on metric prefix.
@@ -72,23 +76,23 @@ def sig(realNum, numSigFig, scale=0):
     
     # Uses the decadic logarithm to determine the number of zeros of realNum.
     # If the magnitude is negative, than the input number is between -1 and 1.
-    magnitude = math.log10(abs(realNum))
+    magnitude = np.log10(abs(realNum))
     
     
-    if magnitude > 0:  
+    if magnitude.any() > 0:  
         # changes where round function operates, so it operates at the first
         # number rather than at the decimal point.
-        res = round(realNum, -int(magnitude) + numSigFig - 1)
+        res = np.round(realNum, -np.int(magnitude) + numSigFig - 1)
         
     else:
         # when magnitude is negative, the number is less than 1,
         # the round function needs no correction.! incorrect explanation.
-        res = round(realNum, -int(magnitude) + numSigFig)
+        res = np.round(realNum, -np.int(magnitude) + numSigFig)
   
     
     # Formats the result as an int if no decimal places are calculated.
-    if magnitude >= 1 and \
+    if magnitude.any() >= 1 and \
     numSigFig <= magnitude + 1:
-        res = int(res)
+        res = np.int(res)
     
     return res

@@ -23,70 +23,9 @@ distance = 4800*1852 #m
 fuel_allow = 487919.0187*0.453592 #kg
 
 
-def C_L_cruise(W, rho, S, V):
-    
-    C_L = (2*W) / (rho * S * V**2)
-    
-    if metric:
-        C_L = C_L*g
-    
-    return C_L
 
 
-# numerical range eqn
-def Range_Num(W_int, rho, V, step, distance_req):
-    
-    dist_travel = 0
-    fuelLoss = 0
-    time = 0
-    
-    
-    C_L_int = C_L_cruise(W_int, rho, S, V)
-        
-    
-    D_int = Drag(rho, V, S_ref, C_D0, K, C_L_int)
-    
-    W = np.zeros(int(1e6))
-    W[0] = W_int
-    
-    C_L, D = np.zeros_like(W), np.zeros_like(W)
-    
-    C_L[0] = C_L_int
-    D[0] = D_int
-    
-    fuelLoss_array = np.zeros_like(W)
-    
-    
-    
-    for i in range(1, len(W)):
-        
-        fuelLoss = -C*D[i-1]*step
-        fuelLoss_array[i] = fuelLoss_array[i-1] + fuelLoss
-        W[i] = W[i-1] + fuelLoss
-        C_L[i] = C_L_cruise(W[i-1], rho, S, V)
-        D[i] = Drag(rho, V, S_ref, C_D0, K, C_L[i-1])
-        
-        dist_travel += V*step
-        time += step
-        if dist_travel > distance_req:
-            break
-    
-    fuelLoss_array[0] = fuelLoss_array[1]
-    
-    W = np.trim_zeros(W)
-    C_L = np.trim_zeros(C_L)
-    D = np.trim_zeros(D)
-    fuelLoss_array = np.trim_zeros(fuelLoss_array)
-    
-    W_loss = W[0] - W[-1]
-    #W_percent = W_loss / W[0]
-    
-    
-    
-    # requirement to have extra fuel equal to 10% greater mission time
-    extraFuel = C*np.average(D)*time*0.1
-    
-    return W_loss, time, dist_travel, extraFuel, W, C_L, D, fuelLoss_array
+
 
 x=0
 def Range_Iter(W_to, climb_fuel, fuel_allow, V, step, distance_req, delta_optim = 0):
@@ -116,6 +55,9 @@ def Range_Iter(W_to, climb_fuel, fuel_allow, V, step, distance_req, delta_optim 
 
     time_array = np.arange(0, mission_time+step, step) / 3600 # hours
 
+
+    C_L_avg = sig(np.average(C_L_array), sf)
+
     ## imperial conversion ##
     if metric:
         W_new = sig(W_new*lb, sf)
@@ -125,7 +67,6 @@ def Range_Iter(W_to, climb_fuel, fuel_allow, V, step, distance_req, delta_optim 
         fuelLossArray = fuelLossArray*lb
         C_L_array = C_L_array*kts
         D_array = D_array*lbf
-        C_L_avg = sig(np.average(C_L_array), sf)
         D_avg = sig(np.average(D_array), sf)
         W_avg = sig(np.average(W_array), sf)
         W_loss = sig(W_loss*lb, sf)
@@ -171,7 +112,7 @@ def Range_Iter(W_to, climb_fuel, fuel_allow, V, step, distance_req, delta_optim 
 
 C_L = 0.5
 
-W_max = 1032500 #lb # - original max-takeoff weight
+
 
 climb_fuel = 14422 #iterative - lb
 other_fuel_estimate = 3000 #takeoff + landing + taxi
@@ -180,7 +121,7 @@ W_cruise = W_max - climb_fuel
 # loads for each mission
 
 
-fuel_allow = W_max  - W_empty - W_max_payload - W_crew
+
 
 crit_mission_dist = 4800*1/nmi
 
@@ -201,7 +142,10 @@ if V_min_drag > V_max:
     
 dynamic_pressure = 1/2*rho_cruise*V_cruise**2
 
-crit = Range_Iter(W_max*kg, climb_fuel*kg, fuel_allow*kg, V_cruise, step, crit_mission_dist, 9000)
+
+W_max = 1032500*kg #kg # - original max-takeoff weight
+fuel_allow = W_max  - W_empty - W_max_payload - W_crew
+crit = Range_Iter(W_max, climb_fuel, fuel_allow, V_cruise, step, crit_mission_dist, 9000)
 
 W_new = crit[0] 
 fuel_allow_new = crit[1]
@@ -221,8 +165,8 @@ if reserves_diff < 0:
     print('u suck')
 #### weight arrays
 
-W_payload_array = np.array([180740, 177109.5, 0, 0])
-W_passenger_array = np.array([0, 0, 51200, 0])
+W_payload_array = np.array([180740, 177109.5, 0, 0])*kg
+W_passenger_array = np.array([0, 0, 51200, 0])*kg
 
 distance_req_array = np.array([4800, 4400, 3800, 7000]) * 1 / nmi #meters
 
@@ -230,7 +174,7 @@ loiter_array = np.array([0, 20, 20, 15])*60 # seconds
 
 W_to_array_nofuel = W_empty + W_crew + W_payload_array + W_passenger_array
 
-W_to_array = W_to_array_nofuel + fuel_allow_new
+W_to_array = W_to_array_nofuel + fuel_allow_new*kg
 
 
 W_to_array_new = np.zeros_like(W_to_array)
@@ -252,7 +196,7 @@ for i in range(1, len(W_payload_array)):
         delta_optim = 4000
         rho_cruise = 0.45973095 # return rho to old value
     
-    mission = Range_Iter(W_to_array[i]*kg, climb_fuel*kg, fuel_allow_new*kg, \
+    mission = Range_Iter(W_to_array[i], climb_fuel, fuel_allow_new, \
                                    V_cruise, step, distance_req_array[i],delta_optim)
     W_to_array_new[i] = mission[0]
     dist_array[i] = mission[3]
@@ -294,3 +238,4 @@ loiter_fuel = loiter_array*D_min_drag*C
 #W_loss_array[1] = W_loss_array[1]*2
 #avg_fuel_array = W_loss_array / mission_time_array
 
+D_avg_array[0] = D_avg_crit
