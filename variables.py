@@ -73,10 +73,10 @@ W_crew = 600*kg
     
 
 # take-off weights calculated from numerical methods
-W_to = np.array([910000, 823000, 619000, 724000])*kg # weight at take off
-W_loss = np.array([283000, 225000, 155000, 294000])*kg
+W_to = np.array([916000, 834000, 638000, 749000])*kg # weight at take off
+W_loss = np.array([308400, 225000, 155000, 294000])*kg
 
-fuel_total = np.array([352000, 253000, 175000, 331000])*kg
+fuel_total = np.array([352000, 264000, 193000, 350000])*kg
 
 fuel_climb_estimate = 14422*kg
 
@@ -125,6 +125,7 @@ W_land = W_to - fuel_climb_estimate - W_loss
 
 
 
+loiter_array = np.array([20, 20, 15])*60 # seconds
 
 
 

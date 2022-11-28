@@ -103,7 +103,7 @@ def Take_Off(T, W, S, mu, rho, C_L, C_D0, K, n=1.2):
 
     takeoff_distance = S_G + S_R + S_TR
     
-    return takeoff_distance, S_G, S_R, S_TR, h_TR, np.degrees(gamma_climb),  \
+    return takeoff_distance, S_G, S_R, S_TR, h_TR, R_trans, np.degrees(gamma_climb),  \
         V_stall, V_to, V_trans, K_T, K_A
 
 
@@ -136,11 +136,14 @@ def Landing(W_land, S, idle_flow, rho, C_L, mu):
     
     T_roll = (idle_flow * V_TD)*4
     
-    S_G = ground_dist(T_roll, W_land, S, mu, rho, C_L, C_D0, K, V_TD, 0)[0]
+    roll = ground_dist(T_roll, W_land, S, mu, rho, C_L, C_D0, K, V_TD, 0)
+    
+    S_G, K_T, K_A = roll
     
     dist_tot = S_a + S_flare + S_free_roll + S_G
     
-    return V_a, D_land, T_land, h_TR, S_a, S_flare, S_free_roll, S_G, dist_tot
+    return dist_tot, S_a, S_flare, S_free_roll, S_G, D_land, T_land, T_roll, \
+        h_TR, R, V_stall, V_a, V_TD, V_f, K_T, K_A
 
 
 def Climb(V, T, W, rho, C_L):
@@ -237,7 +240,7 @@ def Range_Num(W_int, rho, V, step, distance_req):
 
 ### climbiter ###
 
-def Climb_Optim(W, C_L, T=T_cont, iterations=10, step_size=step_size):
+def Climb_Optim(W, C_L, T=T_cont, rho_cruise=rho_cruise, cruise_alt=cruise_alt, iterations=10, step_size=step_size):
     """
     Climb Optimisation
     
@@ -250,25 +253,23 @@ def Climb_Optim(W, C_L, T=T_cont, iterations=10, step_size=step_size):
     """
    
     rho_step = (rho_sl - rho_cruise) / iterations
-    rho_array = np.arange(rho_cruise, rho_sl, rho_step)
+    rho_array = np.arange(rho_cruise, rho_sl+rho_step, rho_step)
     
     alt_step = cruise_alt / iterations
-    alt_array = np.arange(0, cruise_alt, alt_step) * ft
+    alt_array = np.arange(0, cruise_alt+alt_step, alt_step) * ft
     V_stall_array = stall_vel(W, S, rho_array, C_L)
     
     V_min = np.min(V_stall_array)
     V_array = np.arange(V_min, V_max, step_size)
-    
-    
     
     # initalising arrays
     stall_index = np.zeros_like(rho_array)
     V_v_max = np.zeros_like(rho_array)
     V_v_index = np.zeros_like(rho_array)
     V_best_climb = np.zeros_like(rho_array)
-    gamma_climb, V_v = np.zeros([iterations, len(V_array)]), np.zeros([iterations, len(V_array)])
-    D_array = np.zeros([iterations, len(V_array)])
-    gamma_best_climb = np.zeros(iterations)
+    gamma_climb, V_v = np.zeros([iterations+1, len(V_array)]), np.zeros([iterations+1, len(V_array)])
+    D_array = np.zeros([iterations+1, len(V_array)])
+    gamma_best_climb = np.zeros(iterations+1)
     
     for i in range(len(V_array)):
         for j in range(iterations):
@@ -293,7 +294,9 @@ def Climb_Optim(W, C_L, T=T_cont, iterations=10, step_size=step_size):
     plt.ylabel('Vertical Velocity (ft/min)')
     
     
-    for i in range(iterations):
+    for i in range(iterations+1):
+    
+        alt_iter = np.int ( np.round( alt_array[i], 0) )
     
         
         stall_index[i] = np.where(V_array > V_stall_array[i])[0][0]
@@ -305,7 +308,7 @@ def Climb_Optim(W, C_L, T=T_cont, iterations=10, step_size=step_size):
         V_best_climb[i] = V_array[int(V_v_index[i])]
         gamma_best_climb[i] = gamma_climb[i][int(V_v_index[i])]
         
-        plt.plot(V_array[index:], V_v[i][index:], label=str(np.int(alt_array[i])) )
+        plt.plot(V_array[index:], V_v[i][index:], label=str(alt_iter) )
         plt.plot(V_best_climb[i], V_v_max[i], marker='x', color='black')
         
     plt.legend(title='Altitude (ft)')

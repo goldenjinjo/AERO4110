@@ -46,13 +46,13 @@ def sig(realNum, numSigFig, scale=0):
     
     
     # TODO add new check that is compatiable with numpy arrays
-    """
+    
     #if math.isnan(realNum).any() == True:
     #    return realNum
 
     if realNum==0:
         return 0
-    """
+    
     
     if numSigFig < 0:
         raise Exception('Error: Number of Significant Figures Cannot be Negative')
@@ -79,7 +79,7 @@ def sig(realNum, numSigFig, scale=0):
     magnitude = np.log10(abs(realNum))
     
     
-    if magnitude.any() > 0:  
+    if magnitude > 0:  
         # changes where round function operates, so it operates at the first
         # number rather than at the decimal point.
         res = np.round(realNum, -np.int(magnitude) + numSigFig - 1)
@@ -91,7 +91,7 @@ def sig(realNum, numSigFig, scale=0):
   
     
     # Formats the result as an int if no decimal places are calculated.
-    if magnitude.any() >= 1 and \
+    if magnitude >= 1 and \
     numSigFig <= magnitude + 1:
         res = np.int(res)
     
